@@ -613,7 +613,7 @@ public final class S57att { // S57 Attribute lookup tables & methods
     }
 
     public static Integer encodeAttribute(Att attribute) { // Convert SCM attribute enumeration to S57 attribute code
-        return AttS57.get(attribute) != 0 ? AttS57.get(attribute) : AttIENC.get(attribute);
+        return AttS57.get(attribute) != null ? AttS57.get(attribute) : AttIENC.get(attribute);
     }
 
     public static String stringAttribute(Att attribute) { // Convert SCM enumeration to OSM attribute string
