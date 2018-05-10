@@ -70,7 +70,6 @@ public final class Josmtos57 {
     static byte[] record;
 
     public static void main(String[] args) throws IOException {
-
         map = new S57map(false);
         int idx = 0;
 
@@ -98,6 +97,9 @@ public final class Josmtos57 {
                 S57osm.OSMmap(in, map, false);
             } catch (Exception e) {
                 System.err.println("Input data error");
+                System.err.println(e.getMessage());
+                e.printStackTrace();
+                System.err.println(e);
                 System.exit(-1);
             }
             in.close();
@@ -106,11 +108,12 @@ public final class Josmtos57 {
             System.exit(-1);
         }
 
+
         try {
-            buf = new byte[5242880];
+            buf = new byte[524288000];
             idx = S57enc.encodeChart(map, meta, buf);
         } catch (IndexOutOfBoundsException e) {
-            System.err.println("Output file too big (limit 5 MB) - try smaller areas");
+            System.err.println("Output file too big (limit 500 MB) - try smaller areas");
             System.exit(-1);
         } catch (UnsupportedEncodingException e) {
             System.err.println("Input data error" + e.getMessage());
