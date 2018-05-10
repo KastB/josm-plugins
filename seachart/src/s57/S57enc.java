@@ -256,9 +256,14 @@ public final class S57enc { // S57 ENC file generation
             fields.add(new Fparams(S57field.VRPT, new Object[] {(((hash(edge.first) & 0xffffffff) << 8) + 120L), 255, 255, 1, 255, (((hash(edge.last) & 0xffffffff) << 8) + 120L), 255, 255, 2, 255 }));
             Object[] nodes = new Object[0];
             for (long ref : edge.nodes) {
-                Object[] nval = new Object[] {(Math.toDegrees(map.nodes.get(ref).lat) * COMF), (Math.toDegrees(map.nodes.get(ref).lon) * COMF) };
-                nodes = Arrays.copyOf(nodes, (nodes.length + nval.length));
-                System.arraycopy(nval, 0, nodes, (nodes.length - nval.length), nval.length);
+				try {
+					Object[] nval = new Object[] {(Math.toDegrees(map.nodes.get(ref).lat) * COMF), (Math.toDegrees(map.nodes.get(ref).lon) * COMF) };
+					nodes = Arrays.copyOf(nodes, (nodes.length + nval.length));
+					System.arraycopy(nval, 0, nodes, (nodes.length - nval.length), nval.length);
+				} catch (NullPointerException e) {
+					System.out.println("warning: EDGE: node was not added");
+					continue;
+				}
             }
             if (nodes.length > 0) {
                 fields.add(new Fparams(S57field.SG2D, nodes));
@@ -321,15 +326,20 @@ public final class S57enc { // S57 ENC file generation
                         }
                         for (Entry<Att, AttVal<?>> att : atts.entrySet()) {
                             if (!((obj == Obj.SOUNDG) && (att.getKey() == Att.VALSOU))) {
-                                long attl = S57att.encodeAttribute(att.getKey());
-                                Object[] next = new Object[] {attl, S57val.encodeValue(att.getValue(), att.getKey())};
-                                if ((attl < 300) || (attl > 304)) {
-                                    attf = Arrays.copyOf(attf, (attf.length + next.length));
-                                    System.arraycopy(next, 0, attf, (attf.length - next.length), next.length);
-                                } else {
-                                    natf = Arrays.copyOf(natf, (natf.length + next.length));
-                                    System.arraycopy(next, 0, natf, (natf.length - next.length), next.length);
-                                }
+								try {
+									long attl = S57att.encodeAttribute(att.getKey());
+									Object[] next = new Object[] {attl, S57val.encodeValue(att.getValue(), att.getKey())};
+									if ((attl < 300) || (attl > 304)) {
+										attf = Arrays.copyOf(attf, (attf.length + next.length));
+										System.arraycopy(next, 0, attf, (attf.length - next.length), next.length);
+									} else {
+										natf = Arrays.copyOf(natf, (natf.length + next.length));
+										System.arraycopy(next, 0, natf, (natf.length - next.length), next.length);
+									}
+								} catch (NullPointerException e) {
+									System.out.println("warning: object not added: type:" + att.getKey());
+									continue;
+								}
                             }
                         }
                         if (attf.length > 0) {
@@ -360,7 +370,6 @@ public final class S57enc { // S57 ENC file generation
                     refs.add(new Fparams(S57field.FFPT, params));
                     objects.get(objects.size() - 1).addAll(refs);
                 }
-
                 for (ArrayList<Fparams> object : objects) {
                     object.addAll(geom);
                     record = S57dat.encRecord(recs++, object);

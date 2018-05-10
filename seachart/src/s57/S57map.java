@@ -500,8 +500,13 @@ public class S57map { // S57/OSM map generation methods
             break;
         case LINE:
             edges.put(id, edge);
-            nodes.get(edge.first).flg = Nflag.CONN;
-            nodes.get(edge.last).flg = Nflag.CONN;
+            try {
+				nodes.get(edge.first).flg = Nflag.CONN;
+				nodes.get(edge.last).flg = Nflag.CONN;
+            } catch (NullPointerException e) {
+				System.out.println("warning: only one end of LINE in file");
+				return;
+			}
             if (edge.first == edge.last) {
                 feature.geom.prim = Pflag.AREA;
             }
